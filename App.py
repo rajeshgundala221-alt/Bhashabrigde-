@@ -1,4 +1,4 @@
-                                                            """"
+"""                                                            """"
 BhashaBridge - AI Translation Server
 Flask + SQLite + Razorpay + Google Sign-In + Voice Clone Protection
 """
