@@ -1,6 +1,6 @@
-"""
+                                                            """"
 BhashaBridge - AI Translation Server
-Flask + SQLite + Razorpay + Google Sign-In (Firebase)
+Flask + SQLite + Razorpay + Google Sign-In + Voice Clone Protection
 """
 
 from flask import Flask, request, jsonify, render_template_string
@@ -18,20 +18,17 @@ CORS(app)
 # ============================================
 # API KEYS - Set these in Render dashboard
 # ============================================
-SARVAM_API_KEY        = os.getenv("SARVAM_API_KEY", "")
-ELEVENLABS_API_KEY    = os.getenv("ELEVENLABS_API_KEY", "")
-EXOTEL_SID            = os.getenv("EXOTEL_SID", "")
-EXOTEL_API_KEY        = os.getenv("EXOTEL_API_KEY", "")
-EXOTEL_API_TOKEN      = os.getenv("EXOTEL_API_TOKEN", "")
-EXOTEL_CALLER_ID      = os.getenv("EXOTEL_CALLER_ID", "")
-RAZORPAY_KEY_ID       = os.getenv("RAZORPAY_KEY_ID", "")
-RAZORPAY_KEY_SECRET   = os.getenv("RAZORPAY_KEY_SECRET", "")
-
-# Firebase config - Set these in Render dashboard too
-FIREBASE_API_KEY          = os.getenv("FIREBASE_API_KEY", "")
-FIREBASE_AUTH_DOMAIN      = os.getenv("FIREBASE_AUTH_DOMAIN", "")
-FIREBASE_PROJECT_ID       = os.getenv("FIREBASE_PROJECT_ID", "")
-FIREBASE_APP_ID           = os.getenv("FIREBASE_APP_ID", "")
+SARVAM_API_KEY      = os.getenv("sk_d2r2ru9y_N83XxtrFyagFyZmx71CRXV6s", "")
+ELEVENLABS_API_KEY  = os.getenv("sk_05f51f7fe9413c1e28f0830eab7f9a05ce00e3acccdfb975", "")
+EXOTEL_SID          = os.getenv("bhashabrigde1", "")
+EXOTEL_API_KEY      = os.getenv("b17b3e8f46932fdb87ebc0de431cbf1d25cb51b388db89bf", "")
+EXOTEL_API_TOKEN    = os.getenv("bfd1d49eb261a49648886178b8853ad166c082c2080fe7cf", "")
+RAZORPAY_KEY_ID     = os.getenv("SoNDiqRRcfpmbk", "")
+RAZORPAY_KEY_SECRET = os.getenv("rzp_test_SorJHq4QSqEpbh", "")
+FIREBASE_API_KEY    = os.getenv("AIzaSyD5aBdevzSG9aaK8-xbSZQu3PueWCwAw8c", "")
+FIREBASE_AUTH_DOMAIN = os.getenv("Fstudio-7404718737-7ea35.firebaseapp.com", "")
+FIREBASE_PROJECT_ID = os.getenv("studio-7404718737-7ea35", "")
+FIREBASE_APP_ID     = os.getenv("1:605264484893:web:7fb52c44cbcb31cb1c04f4", "")
 
 # ============================================
 # SQLITE DATABASE
@@ -199,7 +196,7 @@ WEB_PAGE = """
         #app { display: none; }
         #login-screen { display: block; }
         .user-bar { background: #0f3460; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: transparent; border: 1px solid #e94560; color: #e94560; width: auto; padding: 5px 12px; font-size: 13px; }
+        .logout-btn { background: transparent; border: 1px solid #e94560 !important; color: #e94560; width: auto; padding: 5px 12px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -218,11 +215,10 @@ WEB_PAGE = """
         </div>
     </div>
 
-    <!-- MAIN APP (shown after login) -->
+    <!-- MAIN APP -->
     <div id="app">
         <h1>🌉 BhashaBridge</h1>
 
-        <!-- USER BAR -->
         <div class="user-bar">
             <span id="user-name">👤 Loading...</span>
             <button class="logout-btn" onclick="logout()">Logout</button>
@@ -236,9 +232,10 @@ WEB_PAGE = """
             <div id="presult"></div>
         </div>
 
-        <!-- VOICE CLONING -->
-        <div class="box">
+        <!-- VOICE CLONING - hidden if already cloned -->
+        <div class="box" id="clone-section">
             <h2>🎙️ Step 1: Clone Your Voice</h2>
+            <p style="color:#aaa;font-size:13px">⚠️ One time only - choose carefully</p>
             <input type="file" id="audiofile" accept="audio/*">
             <button onclick="cloneVoice()">Clone My Voice</button>
             <div id="vresult"></div>
@@ -284,9 +281,6 @@ WEB_PAGE = """
     </div>
 
     <script>
-        // ============================================
-        // FIREBASE CONFIG - injected from server
-        // ============================================
         const firebaseConfig = {
             apiKey: "{{ firebase_api_key }}",
             authDomain: "{{ firebase_auth_domain }}",
@@ -295,23 +289,15 @@ WEB_PAGE = """
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-
         const API = window.location.origin;
         let currentUser = null;
 
-        // ============================================
-        // AUTH - Google Sign In
-        // ============================================
         function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then(result => {
-                    // handled by onAuthStateChanged
-                })
-                .catch(err => {
-                    document.getElementById('login-error').innerHTML =
-                        '<p style="color:#e94560">❌ ' + err.message + '</p>';
-                });
+            auth.signInWithPopup(provider).catch(err => {
+                document.getElementById('login-error').innerHTML =
+                    '<p style="color:#e94560">❌ ' + err.message + '</p>';
+            });
         }
 
         function logout() {
@@ -325,19 +311,14 @@ WEB_PAGE = """
                 document.getElementById('app').style.display = 'block';
                 document.getElementById('user-name').textContent = '👤 ' + user.displayName;
 
-                // Save user to backend
                 await fetch(API + '/save-user', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        uid: user.uid,
-                        name: user.displayName,
-                        email: user.email
-                    })
+                    body: JSON.stringify({uid: user.uid, name: user.displayName, email: user.email})
                 });
 
-                // Check payment status
                 checkAccess();
+                checkVoice();
             } else {
                 currentUser = null;
                 document.getElementById('login-screen').style.display = 'block';
@@ -361,9 +342,19 @@ WEB_PAGE = """
             }
         }
 
-        // ============================================
-        // PAYMENT
-        // ============================================
+        async function checkVoice() {
+            if (!currentUser) return;
+            const res = await fetch(API + '/check-voice', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({user_id: currentUser.uid})
+            });
+            const data = await res.json();
+            if (data.has_voice) {
+                document.getElementById('clone-section').style.display = 'none';
+            }
+        }
+
         async function startPayment() {
             if (!currentUser) return;
             const div = document.getElementById('presult');
@@ -405,9 +396,6 @@ WEB_PAGE = """
             }).open();
         }
 
-        // ============================================
-        // VOICE CLONE
-        // ============================================
         async function cloneVoice() {
             if (!currentUser) return;
             const file = document.getElementById('audiofile').files[0];
@@ -420,13 +408,16 @@ WEB_PAGE = """
             form.append('name', currentUser.displayName);
             const res = await fetch(API + '/clone', {method: 'POST', body: form});
             const data = await res.json();
-            if (data.success) div.innerHTML = '<p class="green">✅ Voice cloned successfully!</p>';
-            else div.innerHTML = '<p class="red">❌ ' + (data.error || 'Failed') + '</p>';
+            if (data.success) {
+                div.innerHTML = '<p class="green">✅ Voice cloned successfully!</p>';
+                setTimeout(() => {
+                    document.getElementById('clone-section').style.display = 'none';
+                }, 2000);
+            } else {
+                div.innerHTML = '<p class="red">❌ ' + (data.error || 'Failed') + '</p>';
+            }
         }
 
-        // ============================================
-        // TRANSLATE
-        // ============================================
         async function translate() {
             if (!currentUser) return;
             const text = document.getElementById('text').value;
@@ -455,9 +446,6 @@ WEB_PAGE = """
             }
         }
 
-        // ============================================
-        // CALL
-        // ============================================
         async function call() {
             const myphone = document.getElementById('myphone').value;
             const friendphone = document.getElementById('friendphone').value;
@@ -510,184 +498,4 @@ def clone_with_elevenlabs(audio_bytes, name):
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
-            data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
-            files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")},
-            timeout=60
-        )
-        if response.status_code == 200:
-            return response.json().get("voice_id")
-        return None
-    except Exception as e:
-        print(f"Voice clone error: {e}")
-        return None
-
-def speak_with_elevenlabs(text, voice_id):
-    try:
-        response = requests.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-            headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json"},
-            json={
-                "text": text,
-                "model_id": "eleven_multilingual_v2",
-                "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
-            },
-            timeout=30
-        )
-        if response.status_code == 200:
-            return response.content
-        return None
-    except Exception as e:
-        print(f"Speech error: {e}")
-        return None
-
-# ============================================
-# EXOTEL - Phone calls
-# ============================================
-def call_with_exotel(from_phone, to_phone):
-    try:
-        if not from_phone.startswith("+"):
-            from_phone = "+91" + from_phone.lstrip("0")
-        if not to_phone.startswith("+"):
-            to_phone = "+91" + to_phone.lstrip("0")
-        url = f"https://{EXOTEL_API_KEY}:{EXOTEL_API_TOKEN}@api.in.exotel.com/v1/Accounts/{EXOTEL_SID}/Calls/connect.json"
-        response = requests.post(url, data={
-            "From": from_phone,
-            "To": to_phone,
-            "CallerId": EXOTEL_CALLER_ID,
-            "CallType": "trans"
-        }, timeout=30)
-        return response.status_code == 200
-    except Exception as e:
-        print(f"Call error: {e}")
-        return False
-
-# ============================================
-# ROUTES
-# ============================================
-
-@app.route("/")
-def homepage():
-    return render_template_string(
-        WEB_PAGE,
-        firebase_api_key=FIREBASE_API_KEY,
-        firebase_auth_domain=FIREBASE_AUTH_DOMAIN,
-        firebase_project_id=FIREBASE_PROJECT_ID,
-        firebase_app_id=FIREBASE_APP_ID
-    )
-
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok", "service": "BhashaBridge"})
-
-@app.route("/save-user", methods=["POST"])
-def save_user_route():
-    data = request.json
-    save_user(data.get("uid"), data.get("name"), data.get("email"))
-    return jsonify({"success": True})
-
-@app.route("/clone", methods=["POST"])
-def clone_voice():
-    audio_file = request.files.get("audio")
-    user_id = request.form.get("user_id", "")
-    name = request.form.get("name", user_id)
-    if not audio_file:
-        return jsonify({"success": False, "error": "No audio file uploaded"})
-    audio_bytes = audio_file.read()
-    voice_id = clone_with_elevenlabs(audio_bytes, name)
-    if voice_id:
-        save_voice(user_id, voice_id)
-        return jsonify({"success": True, "voice_id": voice_id})
-    return jsonify({"success": False, "error": "Voice cloning failed"})
-
-@app.route("/translate", methods=["POST"])
-def translate():
-    data = request.json
-    text = data.get("text", "")
-    from_lang = data.get("from_lang", "en-IN")
-    to_lang = data.get("to_lang", "hi-IN")
-    target_user = data.get("target_user", "")
-    if not text:
-        return jsonify({"success": False, "error": "No text provided"})
-    translated = translate_with_sarvam(text, from_lang, to_lang)
-    audio_base64 = None
-    if target_user:
-        voice_id = get_voice_by_name(target_user)
-        if voice_id:
-            audio_bytes = speak_with_elevenlabs(translated, voice_id)
-            if audio_bytes:
-                audio_base64 = base64.b64encode(audio_bytes).decode()
-    return jsonify({
-        "success": True,
-        "original": text,
-        "translated": translated,
-        "audio": audio_base64
-    })
-
-@app.route("/call", methods=["POST"])
-def make_call():
-    data = request.json
-    from_phone = data.get("from", "")
-    to_phone = data.get("to", "")
-    if not from_phone or not to_phone:
-        return jsonify({"success": False, "error": "Both phone numbers required"})
-    success = call_with_exotel(from_phone, to_phone)
-    log_call(from_phone, to_phone, "success" if success else "failed")
-    if success:
-        return jsonify({"success": True, "message": "Call initiated"})
-    return jsonify({"success": False, "error": "Failed to make call"})
-
-@app.route("/create-order", methods=["POST"])
-def create_order():
-    try:
-        import razorpay
-        data = request.json
-        amount = data.get("amount", 9900)
-        user_id = data.get("user_id", "")
-        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-        order = client.order.create({
-            "amount": amount,
-            "currency": "INR",
-            "payment_capture": 1
-        })
-        order["key"] = RAZORPAY_KEY_ID
-        save_payment(user_id, order["id"], amount, "pending")
-        return jsonify(order)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/verify-payment", methods=["POST"])
-def verify_payment():
-    try:
-        import razorpay
-        data = request.json
-        order_id = data.get("order_id")
-        payment_id = data.get("payment_id")
-        user_id = data.get("user_id")
-        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-        payment = client.payment.fetch(payment_id)
-        if payment["status"] == "captured":
-            update_payment_status(order_id, "paid")
-            return jsonify({"success": True})
-        return jsonify({"success": False})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
-
-@app.route("/check-access", methods=["POST"])
-def check_access():
-    data = request.json
-    user_id = data.get("user_id", "")
-    paid = is_user_paid(user_id)
-    return jsonify({"paid": paid})
-
-# ============================================
-# START SERVER
-# ============================================
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-    @app.route("/check-voice", methods=["POST"])
-def check_voice():
-    data = request.json
-    user_id = data.get("user_id", "")
-    voice_id = get_voice_by_uid(user_id)
-    return jsonify({"has_voice": voice_id is not None})
+            data={"name": na
