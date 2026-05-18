@@ -26,10 +26,10 @@ EXOTEL_API_TOKEN    = os.getenv("bfd1d49eb261a49648886178b8853ad166c082c2080fe7c
 EXOTEL_CALLER_ID    = os.getenv("EXOTEL_CALLER_ID", "")
 RAZORPAY_KEY_ID     = os.getenv("SoNDiqRRcfpmbk", "")
 RAZORPAY_KEY_SECRET = os.getenv("rzp_test_SqtVQYZcJoBX2v", "")
-FIREBASE_API_KEY    = os.getenv("FIREBASE_API_KEY", "")
-FIREBASE_AUTH_DOMAIN = os.getenv("FIREBASE_AUTH_DOMAIN", "")
-FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "")
-FIREBASE_APP_ID     = os.getenv("FIREBASE_APP_ID", "")
+FIREBASE_API_KEY    = os.getenv("AIzaSyD5aBdevzSG9aaK8-xbSZQu3PueWCwAw8c", "")
+FIREBASE_AUTH_DOMAIN = os.getenv("studio-7404718737-7ea35.firebaseapp.com", "")
+FIREBASE_PROJECT_ID = os.getenv("studio-7404718737-7ea35", "")
+FIREBASE_APP_ID     = os.getenv("1:605264484893:web:7fb52c44cbcb31cb1c04f4", "")
 
 # ============================================
 # SQLITE DATABASE
