@@ -498,4 +498,6 @@ def clone_with_elevenlabs(audio_bytes, name):
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
-            data={"name": na
+                      data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
+            files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")},
+     
