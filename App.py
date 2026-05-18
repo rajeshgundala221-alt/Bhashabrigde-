@@ -501,4 +501,26 @@ def clone_with_elevenlabs(audio_bytes, name):
             headers={"xi-api-key": ELEVENLABS_API_KEY},
             data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
             files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")}
-      
+        )
+        if response.status_code == 200:
+            return response.json().get("voice_id", "")
+        return ""
+    except Exception as e:
+        print(f"Clone error: {e}")
+        return ""
+
+def tts_with_elevenlabs(text, voice_id):
+    try:
+        response = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json"},
+            json={"text": text, "model_id": "eleven_multilingual_v2"},
+            timeout=30
+        )
+        if response.status_code == 200:
+            return response.content
+        return None
+    except Exception as e:
+        print(f"TTS error: {e}")
+        return None
+        
