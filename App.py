@@ -18,8 +18,8 @@ CORS(app)
 # ============================================
 # API KEYS - Set these in Render dashboard
 # ============================================
-SARVAM_API_KEY      = os.getenv("SARVAM_API_KEY", "")
-ELEVENLABS_API_KEY  = os.getenv("ELEVENLABS_API_KEY", "")
+SARVAM_API_KEY      = os.getenv("sk_gnfe005i_G1xtKVhHyDlsku0xftzPE097", "")
+ELEVENLABS_API_KEY  = os.getenv("sk_47026a6e51db09fa7594f2b2ac787c4951e9d06eef886f9f", "")
 EXOTEL_SID          = os.getenv("EXOTEL_SID", "")
 EXOTEL_API_KEY      = os.getenv("EXOTEL_API_KEY", "")
 EXOTEL_API_TOKEN    = os.getenv("EXOTEL_API_TOKEN", "")
