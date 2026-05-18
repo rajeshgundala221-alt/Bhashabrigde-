@@ -1,7 +1,8 @@
-"""""
+"""
 BhashaBridge - AI Translation Server
 Flask + SQLite + Razorpay + Google Sign-In + Voice Clone Protection
 """
+
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 import requests
@@ -17,17 +18,18 @@ CORS(app)
 # ============================================
 # API KEYS - Set these in Render dashboard
 # ============================================
-SARVAM_API_KEY      = os.getenv("sk_d2r2ru9y_N83XxtrFyagFyZmx71CRXV6s", "")
-ELEVENLABS_API_KEY  = os.getenv("sk_05f51f7fe9413c1e28f0830eab7f9a05ce00e3acccdfb975", "")
-EXOTEL_SID          = os.getenv("bhashabrigde1", "")
-EXOTEL_API_KEY      = os.getenv("b17b3e8f46932fdb87ebc0de431cbf1d25cb51b388db89bf", "")
-EXOTEL_API_TOKEN    = os.getenv("bfd1d49eb261a49648886178b8853ad166c082c2080fe7cf", "")
-RAZORPAY_KEY_ID     = os.getenv("SoNDiqRRcfpmbk", "")
-RAZORPAY_KEY_SECRET = os.getenv("rzp_test_SorJHq4QSqEpbh", "")
-FIREBASE_API_KEY    = os.getenv("AIzaSyD5aBdevzSG9aaK8-xbSZQu3PueWCwAw8c", "")
-FIREBASE_AUTH_DOMAIN = os.getenv("Fstudio-7404718737-7ea35.firebaseapp.com", "")
-FIREBASE_PROJECT_ID = os.getenv("studio-7404718737-7ea35", "")
-FIREBASE_APP_ID     = os.getenv("1:605264484893:web:7fb52c44cbcb31cb1c04f4", "")
+SARVAM_API_KEY      = os.getenv("SARVAM_API_KEY", "")
+ELEVENLABS_API_KEY  = os.getenv("ELEVENLABS_API_KEY", "")
+EXOTEL_SID          = os.getenv("EXOTEL_SID", "")
+EXOTEL_API_KEY      = os.getenv("EXOTEL_API_KEY", "")
+EXOTEL_API_TOKEN    = os.getenv("EXOTEL_API_TOKEN", "")
+EXOTEL_CALLER_ID    = os.getenv("EXOTEL_CALLER_ID", "")
+RAZORPAY_KEY_ID     = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+FIREBASE_API_KEY    = os.getenv("FIREBASE_API_KEY", "")
+FIREBASE_AUTH_DOMAIN = os.getenv("FIREBASE_AUTH_DOMAIN", "")
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "")
+FIREBASE_APP_ID     = os.getenv("FIREBASE_APP_ID", "")
 
 # ============================================
 # SQLITE DATABASE
@@ -497,8 +499,6 @@ def clone_with_elevenlabs(audio_bytes, name):
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
-                    data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
+            data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
             files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")},
-            timeout=60
-        )
      
