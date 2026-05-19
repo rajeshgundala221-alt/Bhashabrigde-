@@ -496,11 +496,25 @@ def translate_with_sarvam(text, from_lang, to_lang):
 # ============================================
 # ELEVENLABS - Voice cloning + TTS
 # ============================================
-def clone_with_elevenlabs(audio_bytes, name):
+ def clone_with_elevenlabs(audio_bytes, name):
     try:
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
             data={
                 "name": name,
-                "description": f"Voice of
+                "description": f"Voice of {name}",
+                "labels": json.dumps({})
+            },
+            files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")},
+            timeout=60
+        )
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("voice_id", "")
+        print(f"Clone failed: {response.status_code} - {response.text}")
+        return ""
+    except Exception as e:
+        print(f"Clone error: {e}")
+        return ""
+        
