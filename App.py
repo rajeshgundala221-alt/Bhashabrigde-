@@ -10,6 +10,7 @@ import os
 import base64
 import io
 import sqlite3
+import json
 from datetime import datetime
 
 app = Flask(__name__)
@@ -18,18 +19,18 @@ CORS(app)
 # ============================================
 # API KEYS - Set these in Render dashboard
 # ============================================
-SARVAM_API_KEY      = os.getenv("sk_gnfe005i_G1xtKVhHyDlsku0xftzPE097", "")
-ELEVENLABS_API_KEY  = os.getenv("sk_47026a6e51db09fa7594f2b2ac787c4951e9d06eef886f9f", "")
-EXOTEL_SID          = os.getenv("bhashabrigde1", "")
-EXOTEL_API_KEY      = os.getenv("b17b3e8f46932fdb87ebc0de431cbf1d25cb51b388db89bf", "")
-EXOTEL_API_TOKEN    = os.getenv("bfd1d49eb261a49648886178b8853ad166c082c2080fe7cf", "")
+SARVAM_API_KEY      = os.getenv("SARVAM_API_KEY", "")
+ELEVENLABS_API_KEY  = os.getenv("ELEVENLABS_API_KEY", "")
+EXOTEL_SID          = os.getenv("EXOTEL_SID", "")
+EXOTEL_API_KEY      = os.getenv("EXOTEL_API_KEY", "")
+EXOTEL_API_TOKEN    = os.getenv("EXOTEL_API_TOKEN", "")
 EXOTEL_CALLER_ID    = os.getenv("EXOTEL_CALLER_ID", "")
-RAZORPAY_KEY_ID     = os.getenv("SoNDiqRRcfpmbk", "")
-RAZORPAY_KEY_SECRET = os.getenv("rzp_test_SqtVQYZcJoBX2v", "")
-FIREBASE_API_KEY    = os.getenv("AIzaSyD5aBdevzSG9aaK8-xbSZQu3PueWCwAw8c", "")
-FIREBASE_AUTH_DOMAIN = os.getenv("studio-7404718737-7ea35.firebaseapp.com", "")
-FIREBASE_PROJECT_ID = os.getenv("studio-7404718737-7ea35", "")
-FIREBASE_APP_ID     = os.getenv("1:605264484893:web:7fb52c44cbcb31cb1c04f4", "")
+RAZORPAY_KEY_ID     = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+FIREBASE_API_KEY    = os.getenv("FIREBASE_API_KEY", "")
+FIREBASE_AUTH_DOMAIN = os.getenv("FIREBASE_AUTH_DOMAIN", "")
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "")
+FIREBASE_APP_ID     = os.getenv("FIREBASE_APP_ID", "")
 
 # ============================================
 # SQLITE DATABASE
@@ -381,6 +382,7 @@ WEB_PAGE = """
                         body: JSON.stringify({
                             order_id: order.id,
                             payment_id: response.razorpay_payment_id,
+                            signature: response.razorpay_signature,
                             user_id: currentUser.uid
                         })
                     });
@@ -412,7 +414,7 @@ WEB_PAGE = """
             if (data.success) {
                 div.innerHTML = '<p class="green">✅ Voice cloned successfully!</p>';
                 setTimeout(() => {
-                    document.getElementById('clone-section').style.display = 'none';
+                    document.getElementwithId('clone-section').style.display = 'none';
                 }, 2000);
             } else {
                 div.innerHTML = '<p class="red">❌ ' + (data.error || 'Failed') + '</p>';
@@ -499,28 +501,6 @@ def clone_with_elevenlabs(audio_bytes, name):
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
-            data={"name": name, "description": f"Voice of {name}", "labels": "{}"},
-            files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")}
-        )
-        if response.status_code == 200:
-            return response.json().get("voice_id", "")
-        return ""
-    except Exception as e:
-        print(f"Clone error: {e}")
-        return ""
-
-def tts_with_elevenlabs(text, voice_id):
-    try:
-        response = requests.post(
-            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-            headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json"},
-            json={"text": text, "model_id": "eleven_multilingual_v2"},
-            timeout=30
-        )
-        if response.status_code == 200:
-            return response.content
-        return None
-    except Exception as e:
-        print(f"TTS error: {e}")
-        return None
-        
+            data={
+                "name": name,
+                "description": f"Voice of
