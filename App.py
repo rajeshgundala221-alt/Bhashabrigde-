@@ -1,4 +1,4 @@
-"""
+n"""
 BhashaBridge - AI Translation Server
 Flask + SQLite + Razorpay + Google Sign-In + Voice Clone Protection
 """
@@ -501,11 +501,7 @@ def translate_with_sarvam(text, from_lang, to_lang):
         response = requests.post(
             "https://api.elevenlabs.io/v1/voices/add",
             headers={"xi-api-key": ELEVENLABS_API_KEY},
-            data={
-                "name": name,
-                "description": f"Voice of {name}",
-                "labels": json.dumps({})
-            },
+            data={"name": name, "description": "Voice of " + name, "labels": json.dumps({})},
             files={"files": ("voice.mp3", io.BytesIO(audio_bytes), "audio/mpeg")},
             timeout=60
         )
@@ -517,4 +513,4 @@ def translate_with_sarvam(text, from_lang, to_lang):
     except Exception as e:
         print(f"Clone error: {e}")
         return ""
-        
+            
